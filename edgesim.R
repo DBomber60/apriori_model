@@ -10,16 +10,22 @@ patterns <- random.patterns(nItems = nItems, nPats = 20, corr = .1,
 
 data = list()
 for (i in 1:nTrans) {
-  j = rpois(1,1)+1 # how many itemsets does the transaction contain
-  k = findInterval(runif(j), cumsum(patterns@quality$pWeights)) + 1 #which itemsets
+  j = rpois(1,1)+1 # how many itemsets does the transaction contain (add one to avoid empty transactions)
+  k = findInterval(runif(j), cumsum(patterns@quality$pWeights)) + 1 # which itemsets
   trans1 = c()
     for (q in 1:length(k)) {
       trans1 = c(trans1,patterns@items@itemInfo$labels[which(patterns@items@data[,k[q]]==TRUE)])
     }
   data[[i]] = unique(trans1)
 }
-data <- as(data, "transactions")
 
+data <- as(data, "transactions") # coerce to transaction data structure
+
+# compare simulated data to real data
+par(mfrow=c(1,2))
+data(Groceries)
+hist(size(Groceries), main = "Real Data", xlab = "Transaction Size")
+hist(size(data), main = "Simulated Data", xlab = "Transaction Size")
 
 ### Generate design matrix and response vector for full model
 toBits <- function (x, nBits = nodes) {tail(rev(as.numeric(intToBits(x))),nBits)}
